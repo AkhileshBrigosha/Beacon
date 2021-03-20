@@ -25,11 +25,13 @@ public class RangingActivity extends Activity implements BeaconConsumer {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ranging);
+        beaconManager.bind(this);
     }
 
-    @Override 
+    @Override
     protected void onDestroy() {
         super.onDestroy();
+        beaconManager.unbind(this);
     }
 
     @Override 

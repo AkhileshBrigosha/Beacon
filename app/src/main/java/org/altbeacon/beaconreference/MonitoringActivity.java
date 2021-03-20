@@ -29,16 +29,19 @@ import java.util.Collection;
  * @author dyoung
  * @author Matt Tyler
  */
-public class MonitoringActivity extends Activity  {
+public class MonitoringActivity extends Activity  implements BeaconConsumer{
 	protected static final String TAG = "MonitoringActivity";
 	private static final int PERMISSION_REQUEST_FINE_LOCATION = 1;
 	private static final int PERMISSION_REQUEST_BACKGROUND_LOCATION = 2;
+
+	private BeaconManager beaconManager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		Log.d(TAG, "onCreate");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_monitoring);
+		beaconManager = BeaconManager.getInstanceForApplication(this);
 		verifyBluetooth();
 
 
@@ -104,6 +107,12 @@ public class MonitoringActivity extends Activity  {
 
 			}
 		}
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		beaconManager.unbind(this);
 	}
 
 	@Override
@@ -230,4 +239,33 @@ public class MonitoringActivity extends Activity  {
     	});
     }
 
+	@Override
+	public void onBeaconServiceConnect() {
+		beaconManager.removeAllMonitorNotifiers();
+		beaconManager.addMonitorNotifier(new MonitorNotifier() {
+			@Override
+			public void didEnterRegion(Region region) {
+				Log.i(TAG, "I just saw an beacon for the first time!");
+			}
+
+			@Override
+			public void didExitRegion(Region region) {
+				Log.i(TAG, "I no longer see an beacon");
+			}
+
+			@Override
+			public void didDetermineStateForRegion(int state, Region region) {
+				Log.i(TAG, "I have just switched from seeing/not seeing beacons: "+state);
+			}
+		});
+
+		try {
+			beaconManager.startMonitoringBeaconsInRegion(new Region("myMonitoringUniqueId", null, null, null));
+		} catch (RemoteException e) {    }
+	}
+
+	@Override
+	public void onPointerCaptureChanged(boolean hasCapture) {
+
+	}
 }

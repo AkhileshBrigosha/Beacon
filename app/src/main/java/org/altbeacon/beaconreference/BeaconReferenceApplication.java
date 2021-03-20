@@ -14,7 +14,9 @@ import androidx.core.app.NotificationCompat;
 import android.os.Build;
 import android.util.Log;
 
+import org.altbeacon.beacon.BeaconConsumer;
 import org.altbeacon.beacon.BeaconManager;
+import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.Region;
 import org.altbeacon.beacon.powersave.BackgroundPowerSaver;
 import org.altbeacon.beacon.startup.RegionBootstrap;
@@ -41,10 +43,10 @@ public class BeaconReferenceApplication extends Application implements Bootstrap
         // layout expression for other beacon types, do a web search for "setBeaconLayout"
         // including the quotes.
         //
-        //beaconManager.getBeaconParsers().clear();
-        //beaconManager.getBeaconParsers().add(new BeaconParser().
-        //        setBeaconLayout("m:2-3=beac,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25"));
-
+        beaconManager.getBeaconParsers().clear();
+        beaconManager.getBeaconParsers().add(new BeaconParser().
+                setBeaconLayout("m:2-3=beac,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25"));
+        //beaconManager.bind( this);
         beaconManager.setDebug(true);
 
 
@@ -54,7 +56,7 @@ public class BeaconReferenceApplication extends Application implements Bootstrap
         // communicate to users that your app is using resources in the background.
         //
 
-        /*
+
         Notification.Builder builder = new Notification.Builder(this);
         builder.setSmallIcon(R.drawable.ic_launcher);
         builder.setContentTitle("Scanning for Beacons");
@@ -81,7 +83,7 @@ public class BeaconReferenceApplication extends Application implements Bootstrap
         beaconManager.setEnableScheduledScanJobs(false);
         beaconManager.setBackgroundBetweenScanPeriod(0);
         beaconManager.setBackgroundScanPeriod(1100);
-        */
+
 
         Log.d(TAG, "setting up background monitoring for beacons and power saving");
         // wake up the app when a beacon is seen
@@ -106,8 +108,7 @@ public class BeaconReferenceApplication extends Application implements Bootstrap
         }
     }
     public void enableMonitoring() {
-        Region region = new Region("backgroundRegion",
-                null, null, null);
+        Region region = new Region("backgroundRegion",null, null, null);
         regionBootstrap = new RegionBootstrap(this, region);
     }
 
@@ -119,6 +120,7 @@ public class BeaconReferenceApplication extends Application implements Bootstrap
         // matching a Region (defined above) are first seen.
         Log.d(TAG, "Sending notification.");
         sendNotification();
+        //regionBootstrap.disable();
         if (monitoringActivity != null) {
             // If the Monitoring Activity is visible, we log info about the beacons we have
             // seen on its display
